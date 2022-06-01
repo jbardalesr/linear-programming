@@ -25,7 +25,7 @@ end
 
 function simplex(tableau:: Matrix{Float64}, basic_var:: Matrix{Int64})
     show(stdout, "text/plain", tableau)
-    while any(tableau[1, :] .> 0)
+    while any(tableau[1, 1:end - 1] .> 0)
         # max criterion
         c_max = argmax(tableau[1, 1:end - 1])
         # minimum ratio test
@@ -44,5 +44,5 @@ tableau = [3 2 0 0 0 0 0.;
            1 0 0 0 1 0 7.;
            0 1 0 0 0 1 6.]
 
-basic_var = [2 3 4 5]
+basic_var = [3 4 5 6]
 simplex(tableau, basic_var);
