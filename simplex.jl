@@ -29,11 +29,11 @@ function simplex(tableau:: Matrix{Float64}, basic_var:: Matrix{Int64})
         # max criterion
         c_max = argmax(tableau[1, 1:end - 1])
         # minimum ratio test
-        r_min = minimun_ratio_test(tableau[2:end, c_max], tableau[2:end, end]) + 1
+        r_min = minimun_ratio_test(tableau[2:end, c_max], tableau[2:end, end])
         # pivoting
-        tableau = pivoting(tableau, r_min, c_max)
+        tableau = pivoting(tableau, r_min + 1, c_max)
         # swap row with col
-        basic_var[r_min - 1] = c_max
+        basic_var[r_min] = c_max
         show(stdout, "text/plain", tableau)
     end
 end
