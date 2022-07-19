@@ -2,8 +2,6 @@ from IPython.display import Latex, display_latex
 import sympy as sp
 
 
-
-
 def check_tableau(tableau: sp.Matrix, basic_var: list[int], holgura=False):
     """
     Input: tabla_simplex, variables_basicas, holgura=True
