@@ -1,9 +1,9 @@
 import numpy as np
-from util import *
+from algorithms.util import *  # absolute path, use * o nothing 
 
 
-def simplex(tableau: np.ndarray, basic_var: list[int]) -> np.ndarray:
-    print(f"vertex = {basic2vertex(tableau, basic_var)}, x_B = {real_index(basic_var)}\n{tableau}")
+def simplex(tableau: np.ndarray, basic_indices: list[int]) -> np.ndarray:
+    print(f"vertex = {basic2vertex(tableau, basic_indices)}, x_B = {real_index(basic_indices)}\n{tableau}")
     while (tableau[0, :-1] > 0).any():
         # max criterion
         c_max = np.argmax(tableau[0, :-1])
@@ -11,19 +11,19 @@ def simplex(tableau: np.ndarray, basic_var: list[int]) -> np.ndarray:
         r_min = minimum_ratio_test(col=tableau[1:, c_max], b=tableau[1:, -1])
         if r_min == None:
             print("The model is unbounded")
-            extreme_direction(tableau, basic_var, c_max)
+            extreme_direction(tableau, basic_indices, c_max)
             break
         # pivoting work on tableau
         pivoting(tableau, r_min + 1, c_max)
         # swap row with col
-        basic_var[r_min] = c_max
-        print(f"vertex = {basic2vertex(tableau, basic_var)}, x_B = {real_index(basic_var)}\n{tableau}")
+        basic_indices[r_min] = c_max
+        print(f"vertex = {basic2vertex(tableau, basic_indices)}, x_B = {real_index(basic_indices)}\n{tableau}")
     return tableau
 
 
 def big_M(tableau: np.ndarray, basic_var: list[int], artificial_var: list[int]) -> np.ndarray:
     """
-    The big-M procedure, each such constraint $i$ is augmented, together with its slack variable, with a so-called artificial variable $u_i$,  and the objective function is augmented with $−Mu_i$, where $M$ is a big positive real number. For big values of $M$ the simplex algorithm will put highest priority on making the value of the factor $Mu_i$ as small as possible, thereby setting the value of $u_i$ equal to zero. Big-M and two-phases are used when $0$ isn't feasible basic solution.
+    The big-M procedure, each such constraint $i$ is augmented, together with artificial variable $u_i$, and the objective function is augmented with $-Mu_i$, where $M$ is a big positive real number. For big values of $M$ the simplex algorithm will put highest priority on making the value of the factor $Mu_i$ as small as possible, thereby setting the value of $u_i$ equal to zero.
     """
     print(f"x_B = {real_index(basic_var)}\n{tableau}")
     # correct first row of tableau for each artificial var because the artificial_var position is -M
@@ -39,7 +39,7 @@ def big_M(tableau: np.ndarray, basic_var: list[int], artificial_var: list[int]) 
 
 def two_phases(tableau: np.ndarray, c: np.ndarray, basic_var: list[int], artificial_var: list[int]) -> np.ndarray:
     """
-    The big-M procedure, each such constraint $i$ is augmented, together with its slack variable, with a so-called artificial variable $u_i$,  and the objective function is augmented with $-Mu_i$, where $M$ is a big positive real number. For big values of $M$ the simplex algorithm will put highest priority on making the value of the factor $Mu_i$ as small as possible, thereby setting the value of $u_i$ equal to zero. Big-M and two-phases are used when $0$ isn't feasible basic solution.
+    All costs are replaced by the negative of the artificial variables until a basic solution is obtained, after which they are replaced by the original cost.    
     """
     print(f"x_B = {real_index(basic_var)}\n{tableau}")
     # correct first row of tableau because the artificial_var position is -1

@@ -2,7 +2,7 @@ from IPython.display import Latex, display_latex
 import sympy as sp
 
 
-def check_tableau(tableau: sp.Matrix, basic_var: list[int], holgura=False):
+def check_tableau(tableau: sp.Matrix, basic_var: list[int], var: str, holgura=False):
     """
     Input: tabla_simplex, variables_basicas, holgura=True
     1. Verificar que los coeficientes asociados a las variables básicas sean 0.
@@ -32,11 +32,11 @@ def check_tableau(tableau: sp.Matrix, basic_var: list[int], holgura=False):
             return False
     # Si pasa todas las verificaciones es una tabla simplex.
     print("Si es una tabla simplex, cuyo LO original asociado es")
-    tableau2standard(tableau, holgura)
+    tableau2standard(tableau, var, holgura)
     return True
 
 
-def tableau2standard(tableau: sp.Matrix, holgura=False):
+def tableau2standard(tableau: sp.Matrix, var: str, holgura=False):
     dim_1, _ = tableau.shape
     # número de restricciones
     m = dim_1 - 1 if not holgura else 0
@@ -46,5 +46,38 @@ def tableau2standard(tableau: sp.Matrix, holgura=False):
     A = tableau[1:, :-m - 1]
     b = tableau[1:, -1]
     # variables
-    x = sp.Matrix([f"x_{i}" for i in range(1, 7 - m)])
-    display_latex(Latex(f"""$\max{sp.latex(c.dot(x))}\\\\\\text{{subject to}}\\\\{sp.latex(A)}{sp.latex(x)}{simbol}{sp.latex(b)}$"""))
+    x = sp.Matrix([f"{var}_{i}" for i in range(1, 7 - m)])
+    display_latex(Latex(f"$\max{sp.latex(c.dot(x))}\\\\\\text{{subject to}}\\\\{sp.latex(A@x)}{simbol}{sp.latex(b)}$"))
+
+
+def get_cost(c, var, indexes):
+    n = len(c)
+    sign = lambda coeff: '-' if coeff < 0 else '+'
+    cost = str(c[0]) + r"%s_{%s}&" % (var, indexes[0])
+    for i in range(1, n):
+        cost += sign(c[i]) + str(abs(c[i])) + r"%s_{%s}&" % (var, indexes[i])
+    return cost
+
+
+def get_constraints(A, b, var, indexes, inequality):
+    m, n = A.shape
+    sign = lambda coeff: '-' if coeff < 0 else '+'
+    constraints = "\\text{s.t.}\\quad"
+    for i in range(m):
+        constraints += str(A[i, 0]) + r"%s_{%s}&" % (var, indexes[0])
+        for j in range(1, n):
+            constraints += sign(A[i, j]) + str(abs(A[i, j])) + r"%s_{%s}&" % (var, indexes[j])
+        constraints += inequality[i] + "&" + str(b[i]) + "\\\\"
+    return constraints
+
+
+def get_variables(var, indexes):
+    return [r"%s_{%s}" % (var, i) for i in indexes]
+
+
+def print_model(A: sp.Matrix, b: sp.Matrix, c: sp.Matrix, var: str, indexes: list, inequality: list[str], type: str):
+    # all variables are positives x_i >= 0 for all i
+    cost = get_cost(c, var, indexes)
+    constraints = get_constraints(A, b, var, indexes, inequality)
+    variables = ','.join(get_variables(var, indexes))
+    return display_latex(Latex(r"\begin{align*} \text{%s}\quad %s\\%s \end{align*}\\ %s\ge 0" % (type, cost, constraints, variables)))
