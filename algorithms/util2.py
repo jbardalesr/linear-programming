@@ -50,23 +50,35 @@ def tableau2standard(tableau: sp.Matrix, var: str, holgura=False):
     display_latex(Latex(f"$\max{sp.latex(c.dot(x))}\\\\\\text{{subject to}}\\\\{sp.latex(A@x)}{simbol}{sp.latex(b)}$"))
 
 
+def get_variable(coeff, variable, show_sign=True):
+    sign = lambda num: '-' if num < 0 else ('+' if show_sign else '')
+    if coeff == 0:
+        return ''
+    elif abs(coeff) == 1:
+        return sign(coeff) + variable
+    else:
+        return sign(coeff) + str(abs(coeff)) + variable
+
+
 def get_cost(c, var, indexes):
     n = len(c)
-    sign = lambda coeff: '-' if coeff < 0 else '+'
-    cost = str(c[0]) + r"%s_{%s}&" % (var, indexes[0])
+    variable = "%s_{%s}" % (var, indexes[0])
+    cost = "{%s}&" % get_variable(c[0], variable, False)
     for i in range(1, n):
-        cost += sign(c[i]) + str(abs(c[i])) + r"%s_{%s}&" % (var, indexes[i])
+        variable = "%s_{%s}" % (var, indexes[i])
+        cost += "{%s}&" % get_variable(c[i], variable)
     return cost
 
 
 def get_constraints(A, b, var, indexes, inequality):
     m, n = A.shape
-    sign = lambda coeff: '-' if coeff < 0 else '+'
     constraints = "\\text{s.t.}\\quad"
     for i in range(m):
-        constraints += str(A[i, 0]) + r"%s_{%s}&" % (var, indexes[0])
+        variable = "%s_{%s}" % (var, indexes[0])
+        constraints += "{%s}&" % get_variable(A[i, 0], variable, False)
         for j in range(1, n):
-            constraints += sign(A[i, j]) + str(abs(A[i, j])) + r"%s_{%s}&" % (var, indexes[j])
+            variable = "%s_{%s}" % (var, indexes[j])
+            constraints += "{%s}&" % get_variable(A[i, j], variable)
         constraints += inequality[i] + "&" + str(b[i]) + "\\\\"
     return constraints
 

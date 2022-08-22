@@ -1,5 +1,9 @@
-import numpy as np
+import sympy as sp
 from IPython.display import display_latex, Latex
+
+
+def pretty_print(str):
+    display_latex(Latex(str))
 
 
 def print_vector(msg: str, var: str, array: list, indexes: list = None):
@@ -27,9 +31,24 @@ def get_edges(edges: list[Edge], indexes: list):
 def build_matrix(number_node: int, edges: list[Edge]):
     # Output: matrix mx(n+1) A, with component i=1, j=-1, and last component 1
     number_edge = len(edges)
-    A = np.zeros((number_node, number_edge))
+    A = sp.zeros(number_node, number_edge)
     for k in range(number_edge - 1):
         A[edges[k].i - 1, k] = 1
         A[edges[k].j - 1, k] = -1
     A[edges[-1].i - 1, -1] = 1
     return A
+
+
+def calculate_tree(A: sp.Matrix, b: sp.Matrix, c: sp.Matrix, basic_var: list[int], non_basic_var: list[int]):
+    B = A.col(basic_var)
+    print("Matriz B")
+    pretty_print(f"$B={sp.latex(B)}$")
+    N = A.col(non_basic_var)
+    B_inv = B.inv()
+    # x = B^{-1} b
+    x_sol = B_inv @ b
+    # w^T = c_BI^T B^{-1} 
+    w_T = c.row(basic_var).T @ B_inv
+    # z = w^T N - c_NI^T
+    z = w_T @ N - c.row(non_basic_var).T
+    return x_sol, w_T, z

@@ -1,6 +1,7 @@
 from itertools import combinations
 import math
 import sympy as sp
+import numpy as np
 from IPython.display import display_latex, Latex
 
 
@@ -26,7 +27,7 @@ def factible_vertex(A: sp.Matrix, b: sp.Matrix, c: sp.Matrix):
             pretty_print(f"$A^{{-1}}={sp.latex(A_inv)}\quad x{indexes}={sp.latex(x)}\quad c={c.dot(x).evalf()}$")
 
 
-def basic_solutions(A, b):
+def basic_solutions(A: sp.Matrix, b: sp.Matrix):
     m, n = A.shape
     print("Number of combinations: %d" % math.comb(n, m))
     for i, comb in enumerate(combinations(range(n), m)):
@@ -41,3 +42,18 @@ def basic_solutions(A, b):
             print(ex)
             pretty_print(f"$$B = {sp.latex(B)}, {sp.latex(x_labels)}$$")
             continue
+
+
+def get_all_vertex(A: np.ndarray, b: np.ndarray, c: np.ndarray):
+    m = b.shape[0]
+    n = c.shape[0]
+    for comb in combinations(range(n + m), m):
+        B = A[:, comb]
+        if np.linalg.matrix_rank(B) == m:
+            B_inv = np.linalg.inv(B)
+            x_B = B_inv @ b
+            if (x_B >= 0.0).all():
+                x = np.zeros(m + n)
+                x[list(comb)] = B_inv @ b
+                # true index vertex + 1
+                print(f"x_B={list(map(lambda x: x+ 1, comb))}, v={x[:n]}, c={np.dot(c, x[:n])}")

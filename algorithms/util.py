@@ -79,8 +79,14 @@ def extreme_direction(tableau: np.ndarray, basic_indices: list[int], col: int) -
     dim_1, dim_2 = tableau.shape
     m = len(basic_indices)
     n = dim_2 - dim_1
+    non_basic_indices = list(set(range(m + n)) - set(basic_indices))
     x = np.zeros(m + n)
-    dir = np.zeros(m + n)
-    x[basic_indices] = tableau[1:, -1]
-    dir[basic_indices] = tableau[1:, col]
-    print(f"L = {x} + λ{-dir}\nL = {x[:n]} + λ{-dir[:n]}")
+    direction = np.zeros(m + n)
+
+    e = np.zeros(n)
+    e[non_basic_indices.index(col)] = 1.0
+
+    x[basic_indices] = tableau[1:, -1]              # B^{-1}b
+    direction[basic_indices] = -tableau[1:, col]    # -B^{-1}N    
+    direction[non_basic_indices] = e
+    print(f"L = {x} + λ{direction}\nL = {x[:n]} + λ{direction[:n]}")
